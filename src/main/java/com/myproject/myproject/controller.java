@@ -8,7 +8,7 @@ public class controller {
 
     @RequestMapping("/")
     public String index() {
-        return "Greetings from Spring Boot!";
+        return "Hello world";
     }
     @PostMapping("/todo")
     public void addTodo(@RequestParam Map map){
