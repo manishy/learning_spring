@@ -6,11 +6,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.sql.*;
+import java.util.Map;
 
 public class DbHandler {
     private static final String jdbcDriverClassName = "org.postgresql.Driver";
     private static final String SET_SQL = "SET search_path to sample_user;";
     private static final String SELECT_SQL = "SELECT * FROM users";
+    private static final String INSERT_SQL = "INSERT INTO users (user_name) VALUES (?)";
 
     public DbHandler() throws ClassNotFoundException, IllegalAccessException, InstantiationException {
         Class.forName(jdbcDriverClassName).newInstance();
@@ -50,9 +52,28 @@ public class DbHandler {
         }
     }
 
-    public static void main(String[] args) throws IllegalAccessException, InstantiationException, ClassNotFoundException, SQLException, JSONException {
-        DbHandler dbHandler = new DbHandler();
-        System.out.println(dbHandler.getUsers());
+    public void addUser(Map<String, String> user) throws SQLException {
+        String userName = user.get("username");
+        Connection conn = null;
+        Statement statement = null;
+        PreparedStatement preparedStatement = null;
+        try {
+            conn = DbConnections.create();
+            statement = conn.createStatement();
+            statement.execute(SET_SQL);
+            preparedStatement = conn.prepareStatement(INSERT_SQL);
+            preparedStatement.setString(1, userName);
+            preparedStatement.execute();
+            System.out.println("Added user ....");
+            conn.commit();
+        } catch (Exception e) {
+            DbConnections.rollback(conn);
+            throw e;
+        }finally {
+            DbConnections.closeStatement(statement);
+            DbConnections.closeStatement(preparedStatement);
+            DbConnections.destroy(conn);
+        }
     }
 
 }
