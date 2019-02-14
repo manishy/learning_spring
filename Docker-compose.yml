@@ -1,11 +1,32 @@
 version: '3'
 services:
-  web1:
+  db:
+    image: postgres
+    networks:
+      - backend
+    volumes:
+      - data_base:/var/lib/postgresql/data
+  dbhandler:
     build: .
+    depends_on:
+      - db
+    networks:
+      - backend
+      - frontend
+
+  web:
+    build:
+      context: ./../web/
+      dockerfile: ./Dockerfile
+    depends_on:
+      - dbhandler
     ports:
       - "8000:8080"
+    networks:
+      - frontend
+volumes:
+  data_base:
+networks:
+  frontend:
+  backend:
 
-  jarBuilder:
-    build:
-          context: ./jarBuilder/
-          dockerfile: dockerfile
